@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	_ "github.com/chrislusf/glow/driver"
@@ -22,44 +21,38 @@ const averageScore int = 50
 This method called before main().
 */
 func init() {
-	saveCountToFile(averageScore)
+	saveCountToFile("cities.csv", "IN_AP_PUATR")
 }
 
 // initialies data transformation using map-reduce-filter
-func saveCountToFile(avScore int) {
+func saveCountToFile(filePath string, filterStr string) {
 	fInput.TextFile(
-		"input.txt", 2,
+		filePath, 2,
 	).Map(func(line string, out chan flow.KeyValue) {
 
-		array := strings.Split(line, "|")
-		marks, _ := strconv.Atoi(array[2])
+		array := strings.Split(line, ",")
+		//marks, _ := strconv.Atoi(array[2])
+		key := array[2] + "_" + array[1] + "_" + array[0]
 
-		out <- flow.KeyValue{Key: array[1], Value: marks}
+		out <- flow.KeyValue{Key: key, Value: line}
 
-	}).ReduceByKey(func(x int, y int) int {
-		return (x + y) / 2
-	}).Filter(func(subject string, marks int) bool {
-		return marks >= avScore
-	}).Map(func(key string, marks int) int {
-		return 1
-	}).Reduce(func(x int, y int) int {
-		return x + y
-	}).Map(func(x int) {
-		println("count:", x)
-		writeIntoFile(x)
+	}).Filter(func(key string, marks string) bool {
+		return key == filterStr
+	}).Map(func(key1 string, marks string) string {
+		fmt.Println(key1)
+		writeIntoFile(key1)
+		return key1
 	})
-
-	return
 }
 
 /*
 Write count into File
 */
-func writeIntoFile(count int) {
+func writeIntoFile(count string) {
 
 	f, _ := os.Create("output.txt")
 	w := bufio.NewWriter(f)
-	fmt.Fprintf(w, "%d\n", count)
+	fmt.Fprintf(w, "%s\n", count)
 	w.Flush()
 }
 
