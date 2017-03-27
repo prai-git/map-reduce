@@ -11,38 +11,71 @@ import (
 	"github.com/chrislusf/glow/flow"
 )
 
+type Permission struct {
+	parent   *Permission
+	incluse []string
+	excluse []string
+}
+
+type Region struct {
+	parent   *Permission
+	incluse []string
+	excluse []string
+}
+
+const recordSet *Dataset;
+const keyValueMap [string]string = [];
+
 var (
 	fInput = flow.New()
 )
-
-const averageScore int = 50
 
 /*
 This method called before main().
 */
 func init() {
-	saveCountToFile("cities.csv", "Pusapatirega_Andhra Pradesh_India")
+	creatMap("cities.csv") // , "IN_AP_PUATR")
 }
 
-// initialies data transformation using map-reduce-filter
-func saveCountToFile(filePath string, filterStr string) {
-	fInput.TextFile(
-		filePath, 2,
-	).Map(func(line string, out chan flow.KeyValue) {
+func hasKey():void
+{
+	
+}
 
-		array := strings.Split(line, ",")
-		//marks, _ := strconv.Atoi(array[2])
-		key := array[3] + "_" + array[4] + "_" + array[5]
-
-		out <- flow.KeyValue{Key: key, Value: line}
-
-	}).Filter(func(key string, marks string) bool {
+func hasPermission(key, permission Permission) bool{
+	permissionBool bool
+	if(permission.parent != null)
+	{
+		permissionBool =  hasPermission(key, permission.parent)
+		if(permissionBool == false)
+		{
+			return false
+		}
+	}
+	
+	recordSet.Filter(func(key string, marks string) bool {
 		return key == filterStr
 	}).Map(func(key1 string, marks string) string {
 		fmt.Println(key1)
 		writeIntoFile(key1)
 		return key1
 	})
+}
+
+
+// initialies data transformation using map-reduce-filter
+func creatMap(filePath string) *Dataset {
+	recordSet = fInput.TextFile(
+		filePath, 2,
+	).Map(func(line string, out chan flow.KeyValue) {
+
+		array := strings.Split(line, ",")
+		//marks, _ := strconv.Atoi(array[2])
+		key := array[3] + "_" + array[4] + "_" + array[5]
+		out <- flow.KeyValue{Key: key, Value: line}
+	})
+	
+	return &recordSet;
 }
 
 /*

@@ -21,7 +21,7 @@ const averageScore int = 50
 This method called before main().
 */
 func init() {
-	saveCountToFile("cities.csv", "Pusapatirega_Andhra Pradesh_India")
+	saveCountToFile("cities.csv", "IN_AP_PUATR")
 }
 
 // initialies data transformation using map-reduce-filter
@@ -32,7 +32,7 @@ func saveCountToFile(filePath string, filterStr string) {
 
 		array := strings.Split(line, ",")
 		//marks, _ := strconv.Atoi(array[2])
-		key := array[3] + "_" + array[4] + "_" + array[5]
+		key := array[2] + "_" + array[1] + "_" + array[0]
 
 		out <- flow.KeyValue{Key: key, Value: line}
 
